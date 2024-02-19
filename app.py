@@ -78,14 +78,14 @@ def nettoyage(uploadFile):
         plt.ylabel('Fréquences')
         st.pyplot(fig)
         
-        """styled_write2("<p  style= 'font-weight:bold;color:rgb(15, 76, 116);'>Voici un aperçu des relations entre les principales variables de votre jeu de donnée</p>")
+        styled_write2("<p  style= 'font-weight:bold;color:rgb(15, 76, 116);'>Voici un aperçu des relations entre les principales variables de votre jeu de donnée</p>")
         if uploadFile=="diabete.csv":
             toplot=df[['age','sex','bmi','bp','target']]
             fig = sns.pairplot(toplot)
             st.pyplot(fig)
         else:
             fig = sns.pairplot(df)
-            st.pyplot(fig)"""
+            st.pyplot(fig)
         
         mask = np.triu(df.select_dtypes("number").corr())
         fig2, ax = plt.subplots(figsize=(10, 10))
