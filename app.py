@@ -26,9 +26,9 @@ def loading(uploadFile):
         styled_write2(f"<p  style= 'font-weight:bold;color:rgb(15, 76, 116);'>Voici un aperçu de votre jeu de donnée</p>")
         styled_write2(f"<p  style= 'font-weight:bold;'>Voici les 5 premières lignes de  {uploadFile}</p>")
         if uploadFile=="co2.csv":
-            df= pd.read_csv("C:/Users/Gwen/Desktop/Projet3K/"+uploadFile,sep=";")
+            df= pd.read_csv(uploadFile,sep=";")
         else:
-            df= pd.read_csv("C:/Users/Gwen/Desktop/Projet3K/"+uploadFile,sep=",")
+            df= pd.read_csv(uploadFile,sep=",")
         st.dataframe(df.head())
         return df
     else:
@@ -125,7 +125,7 @@ def page1():
     df_clean=nettoyage(uploadFile)
     st.session_state['df']= df_clean
 
-set_background('C:/Users/Gwen/Desktop/Projet3K/monitor2.jpg')
+set_background('monitor2.jpg')
 # On considère pour l'exercice qu'à une target catégorielle est appliqué 
 # un modèle de classification et à une target continue est appliqué
 # un modèle de regression
