@@ -131,7 +131,9 @@ def regressionChoice(df,selected_model,selected_columns):
 	# Proposer à l'utilisateur de sauvegarder le modèle
 	if checkbox_value3:
 		# Sauvegarder le modèle avec joblib
-		filename = "modele_ml.joblib"
+		filename = "model.bin"
 		joblib.dump(model, filename)
 		st.success(f"Modèle sauvegardé sous le nom : {filename}")
+		with open(filename,'rb') as f:
+   			st.download_button('Download Model', f,file_name='model.bin',mime='binary/octet-stream')  # Defaults to 'text/plain'
 
