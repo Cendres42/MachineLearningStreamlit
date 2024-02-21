@@ -1,8 +1,13 @@
 # votre code ici
 import pandas as pd 
 
-#df=pd.read_csv("C:/Users/Gwen/Desktop/Projet3/diabete.csv",sep=",")
+#df=pd.read_csv("C:/Users/Gwen/Desktop/Projet3/vin.csv",sep=",")
 
+#
+# @param le dataframe
+# @brief description df
+# @return infos sur df
+#
 def donnees(df):
 	affichageColonnes=df.columns
 	taille=df.shape
@@ -10,6 +15,11 @@ def donnees(df):
 	columnsWithNa = df.columns[df.isna().any()].tolist()
 	return affichageColonnes,taille,MoyMedMinMax,columnsWithNa
 
+#
+# @param le dataframe
+# @brief vérification que les colonnes sont standardisées
+# @return listes des colonnes standardisées ou non
+#
 def verifSandard(df):
 	#exclusion de la target de la standardisaton:
 	toexclude=df.drop('target',axis=1)
@@ -25,6 +35,10 @@ def verifSandard(df):
 		tostandardValue(df,listeNonColstandard)
 	return listeColstandard,listeNonColstandard
 
+#
+# @param le dataframe, la liste des colonnes non standardisées
+# @brief standardisation des colonnes
+ #
 def tostandardValue(df,listeNonColstandard):
 	from sklearn.preprocessing import StandardScaler
 	# Identifiez les colonnes dont les valeurs ne sont pas comprises entre -1 et +1
@@ -32,7 +46,6 @@ def tostandardValue(df,listeNonColstandard):
 	scaler = StandardScaler()
 	# Standardisez seulement les colonnes nécessaires
 	df[listeNonColstandard] = scaler.fit_transform(df[listeNonColstandard])
-	# Affichez le DataFrame après standardisation
 
 
 
