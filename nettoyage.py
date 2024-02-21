@@ -6,7 +6,7 @@ import pandas as pd
 def donnees(df):
 	affichageColonnes=df.columns
 	taille=df.shape
-	MoyMedMinMax=df.describe(include='all')
+	MoyMedMinMax=df.describe()
 	columnsWithNa = df.columns[df.isna().any()].tolist()
 	return affichageColonnes,taille,MoyMedMinMax,columnsWithNa
 

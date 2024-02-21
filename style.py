@@ -20,8 +20,6 @@ def set_background(png_file):
     st.markdown(page_bg_img, unsafe_allow_html=True)
 
 
-
-
 def styled_write(content):
     st.write(
         f"""

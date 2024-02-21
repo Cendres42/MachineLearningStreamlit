@@ -1,23 +1,13 @@
 import streamlit as st
 from sklearn.model_selection import train_test_split
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-
 from sklearn.linear_model import LogisticRegression
-from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.svm import SVC
 from sklearn.metrics import confusion_matrix, classification_report
-from sklearn.metrics import precision_score, recall_score, roc_auc_score
-from sklearn.metrics import roc_curve,auc
+from sklearn.metrics import  roc_auc_score
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import accuracy_score
-
-from sklearn.model_selection import KFold
-import statsmodels.formula.api as smf
-from style import styled_write, styled_write2
+from style import styled_write
 
 
 
@@ -25,24 +15,25 @@ def modelLogistic():
 	model = LogisticRegression()
 	# Définir la grille des hyperparamètres à rechercher
 	param_grid = {
-		'penalty': ['l1', 'l2'],
+		#'penalty': ['l1', 'l2'],
 		'C': [0.001, 0.01, 0.1, 1, 10, 100],
-		'solver': ['liblinear', 'newton-cg', 'lbfgs', 'sag', 'saga'],
+		#'solver': ['liblinear', 'newton-cg', 'lbfgs', 'sag', 'saga'],
 		'max_iter': [50, 100, 200],
 		'fit_intercept': [True, False],
-		'class_weight': [None, 'balanced']
+		#'class_weight': [None, 'balanced']
 	}
 	# Initialiser la recherche sur grille avec une validation croisée (5 plis dans cet exemple)
 	grid_search = GridSearchCV(estimator=model, param_grid=param_grid, cv=5, scoring='accuracy')
+	print(grid_search)
 	return grid_search
 
 def modelRandomForest():
 	model = RandomForestClassifier()
 	param_grid = {
     'n_estimators': [50, 100, 200],
-    'max_depth': [None, 10, 20, 30],
+    #'max_depth': [None, 10, 20, 30],
     'min_samples_split': [2, 5, 10],
-    'min_samples_leaf': [1, 2, 4],
+    #'min_samples_leaf': [1, 2, 4],
     'bootstrap': [True, False]
 	}
 	# Initialiser GridSearchCV avec le modèle et les hyperparamètres
@@ -54,32 +45,50 @@ def modelKNeighbors():
 	param_grid = {
     'n_neighbors': [3, 5, 7],
     'weights': ['uniform', 'distance'],
-    'algorithm': ['auto', 'ball_tree', 'kd_tree', 'brute'],
+    #'algorithm': ['auto', 'ball_tree', 'kd_tree', 'brute'],
     'p': [1, 2]
 	}
 	# Initialiser le modèle KNeighborsClassifier
 	model = KNeighborsClassifier()
 	# Initialiser GridSearchCV avec le modèle et les hyperparamètres
 	grid_search = GridSearchCV(model, param_grid, cv=5, scoring='accuracy')
+	
 	return grid_search
 
 
-def classificationChoice(df,selected_model):
+def classificationChoice(df,selected_model,selected_columns):
 		# Séparez les features et la target
 	y = df['target']
-	X = df.drop('target', axis=1)
+	X = df[selected_columns]
 	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 	if selected_model =="LogisticRegression":
-		grid_search=modelLogistic()
+		checkbox_value=st.checkbox("Cocher cette case si vous souhaitez utiliser GridSearchCV")
+		if checkbox_value:
+			grid_search=modelLogistic()
+			styled_write("La valeur des hyperparamètres est optimisée grâce à GridSearchCV")
+		else:
+			grid_search=LogisticRegression()
+
 	elif selected_model == "RandomForestClassifier":
-		grid_search=modelRandomForest()
+		checkbox_value2=st.checkbox("Cocher cette case si vous souhaitez utiliser GridSearchCV")
+		if checkbox_value2:
+			grid_search=modelRandomForest()
+			styled_write("La valeur des hyperparamètres est optimisée grâce à GridSearchCV")
+		else:
+			grid_search=RandomForestClassifier()
+		
 	elif selected_model == "KNeighborsClassifier":
-		grid_search=modelKNeighbors()
+		checkbox_value3=st.checkbox("Cocher cette case si vous souhaitez utiliser GridSearchCV")
+		if checkbox_value3:
+			grid_search=modelKNeighbors()
+			styled_write("La valeur des hyperparamètres est optimisée grâce à GridSearchCV")
+		else:
+			grid_search=KNeighborsClassifier()
+	
 	else:
 		return ("NoData")
 
 	#entrainement du modèle
-	styled_write("Les hyperparamètres optimaux ont été appliqués grâce à GridSearchCV")
 	grid_search.fit(X_train, y_train)
 	# Prédictions
 	y_pred = grid_search.predict(X_test)
@@ -88,7 +97,6 @@ def classificationChoice(df,selected_model):
 	y_prob = grid_search.predict_proba(X_test)
 	styled_write(f"Un extrait des probabilités de classification du vin")
 	st.table(y_prob[0:7])
-	
 	h2_title = '<h2 style=" color:darkred; background-color: rgba(255, 255, 255, 0.7);font-size: 20px;">Partie 2 - Evaluation du modèle - Metrics </h2>'
 	st.markdown(h2_title, unsafe_allow_html=True)
 	accuracy = accuracy_score(y_test, y_pred)
@@ -96,10 +104,11 @@ def classificationChoice(df,selected_model):
 	styled_write(f"<p style= 'font-weight:bold;'>Matrice de confusion</p>")
 	cm = confusion_matrix(y_test, y_pred)
 	st.table(cm)
-	styled_write(f"<p style= 'font-weight:bold;'>Aire sous la courbe ROC</p>")
+	styled_write(f"<p style= 'font-weight:bold;'>Score ROC</p>")
 	roc=roc_auc_score(y_test, grid_search.predict_proba(X_test),multi_class='ovr',average='macro')
 	styled_write(f"Probabilité que le modèle attribue un score plus élevé à une instance positive par rapport à une instance négative choisie au hasard : {roc}")
 	styled_write("Un modèle parfait aurait une ROC AUC égale à 1, tandis qu'un modèle aléatoire aurait une ROC AUC de 0.5.")
+
 	cr = classification_report(y_test, y_pred)
 	st.text("Rapport de Classification :\n\n{}".format(cr))
 

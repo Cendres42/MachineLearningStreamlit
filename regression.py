@@ -9,7 +9,8 @@ from sklearn.model_selection import KFold
 import statsmodels.formula.api as smf
 import matplotlib.pyplot as plt
 import numpy as np
-from style import styled_write, styled_write2
+from style import styled_write
+import joblib
 
 def findAlphaforRidge(X_train,y_train):
 	param_grid = {'alpha': [0.1, 0.5, 1.0, 2.0, 5.0]}
@@ -22,10 +23,8 @@ def findAlphaforRidge(X_train,y_train):
 	return best_alpha
 
 def modelRidge(best_alpha):
-	styled_write("La valeur d'alpha est optimisée grâce à GridSearchCV mais vous pouvez la modifier")
 	alpha = st.slider("Alpha (Ridge)", min_value=0.0, max_value=1.0, value=best_alpha)
-	model = Ridge(alpha=best_alpha)
-	# Obtenez la meilleure valeur d'alpha
+	model = Ridge(alpha)
 	return model
 
 def modelLinear():
@@ -37,12 +36,11 @@ def modelLasso():
 	model = Lasso(alpha=alpha)
 	return model
 
-def validationCroisee(df):
+def validationCroisee(df,selected_columns):
 	h2_title = '<h2 style=" color:darkred; background-color: rgba(255, 255, 255, 0.7);font-size: 20px;">Partie 3 - Validation croisée </h2>'
 	st.markdown(h2_title, unsafe_allow_html=True)
 	styled_write("Voici les résultats de la validation croisée du KFold")
-
-	FEATURES = [x for x in df.columns if x!='target']
+	FEATURES = selected_columns
 	TARGET = 'target'
 	equation = " + ".join(FEATURES)
 	kf = KFold(n_splits=5,shuffle=True,random_state=2021)
@@ -70,27 +68,24 @@ def validationCroisee(df):
 		st.pyplot(fig)
 
 
-
-
-
-
-
-
-
-
-
-def regressionChoice(df,selected_model):
+def regressionChoice(df,selected_model,selected_columns):
 	# Séparez les features et la target
 	y = df['target']
-	X = df.drop('target', axis=1)
+	X = df[selected_columns]
 	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 	# Créez un menu déroulant pour choisir le modèle
 	if selected_model =="Linear Regression":
 		#X=[['age','sex','bmi','bp']]
 		model=modelLinear()
 	elif selected_model == "Ridge Regression":
-		best_alpha=findAlphaforRidge(X_train,y_train)
-		model=modelRidge(best_alpha)
+		checkbox_value=st.checkbox("Cocher cette case si vous souhaitez utiliser GridSearchCV")
+		if checkbox_value:
+			best_alpha=findAlphaforRidge(X_train,y_train)
+			model=modelRidge(best_alpha)
+			styled_write("La valeur d'alpha est optimisée grâce à GridSearchCV mais vous pouvez la modifier")
+
+		else:
+			model=modelRidge(1.0)
 	elif selected_model == "Lasso Regression":
 		model=modelLasso()
 	else:
@@ -126,6 +121,17 @@ def regressionChoice(df,selected_model):
 	# Interprétation des coefficients
 	for i, coef in enumerate(coefficients):
 		styled_write(f"La caractéristique {i+1} a un impact de {coef} sur la variable cible.")
+	
+	checkbox_value2=st.checkbox("Cocher cette case si vous souhaitez effectuer une validation croisée")
+	if checkbox_value2:
+		validationCroisee(df,selected_columns)
 
-	validationCroisee(df)
+	st.title("Sauvegarder le modèle de ML")
+	checkbox_value3=st.button("Cliquez ici si vous souhaitez sauvegarder votre modèle")
+	# Proposer à l'utilisateur de sauvegarder le modèle
+	if checkbox_value3:
+		# Sauvegarder le modèle avec joblib
+		filename = "modele_ml.joblib"
+		joblib.dump(model, filename)
+		st.success(f"Modèle sauvegardé sous le nom : {filename}")
 
