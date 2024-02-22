@@ -100,8 +100,6 @@ def nettoyage(uploadFile):
         # représentation graphique des corrélations (nuage de points)
         styled_write2("<p  style= 'font-weight:bold;color:rgb(15, 76, 116);'>Voici un aperçu des relations entre les principales variables de votre jeu de donnée</p>")
         if selected_columns!=[]:
-            df2 = pd.DataFrame({'NouvelleColonne': [1, 2, 3, 4]})
-            df = pd.concat([df, df2], axis=1)
             toplot=df[display_columns]
             fig = sns.pairplot(toplot)
             st.pyplot(fig)
