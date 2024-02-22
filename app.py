@@ -81,7 +81,8 @@ def nettoyage(uploadFile):
         st.dataframe(df.head())
         styled_write2("<p  style= 'font-weight:bold;color:rgb(15, 76, 116);'>Le modèle de ML sera appliqué sur les colonnes que vous allez sélectionner</p>")
         selected_columns=st.multiselect("Choisissez vos features :", df.columns)
-        
+        display_columns = selected_columns.copy()
+        display_columns.append('target')
         h2_title = '<h2 style=" color:darkred; background-color: rgba(255, 255, 255, 0.7);font-size: 20px;">Partie 3 - Représentation graphique </h2>'
         st.markdown(h2_title, unsafe_allow_html=True)
         
@@ -99,7 +100,9 @@ def nettoyage(uploadFile):
         # représentation graphique des corrélations (nuage de points)
         styled_write2("<p  style= 'font-weight:bold;color:rgb(15, 76, 116);'>Voici un aperçu des relations entre les principales variables de votre jeu de donnée</p>")
         if selected_columns!=[]:
-            toplot=df[selected_columns]
+            df2 = pd.DataFrame({'NouvelleColonne': [1, 2, 3, 4]})
+            df = pd.concat([df, df2], axis=1)
+            toplot=df[display_columns]
             fig = sns.pairplot(toplot)
             st.pyplot(fig)
 
