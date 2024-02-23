@@ -79,32 +79,10 @@ def nettoyage(uploadFile):
         styled_write(f"Colonnes ayant fait l'objet d'un standardisation : {listeNonColstandard}")
         styled_write2(f"<p  style= 'font-weight:bold;'>Voici les 5 premières lignes de votre dataframe après nettoyage :  </p>")
         st.dataframe(df.head())
-        styled_write2("<p  style= 'font-weight:bold;color:rgb(15, 76, 116);'>Le modèle de ML sera appliqué sur les colonnes que vous allez sélectionner</p>")
-        selected_columns=st.multiselect("Choisissez vos features :", df.columns)
-        display_columns = selected_columns.copy()
-        display_columns.append('target')
         h2_title = '<h2 style=" color:darkred; background-color: rgba(255, 255, 255, 0.7);font-size: 20px;">Partie 3 - Représentation graphique </h2>'
         st.markdown(h2_title, unsafe_allow_html=True)
-        
-        # représentation graphique Target
-        styled_write2("<p  style= 'font-weight:bold;color:rgb(15, 76, 116);'>Voici la représentation graphique de votre target</p>")
-        frequences = df['target'].value_counts(normalize=True)
-        effectifs = df['target'].value_counts()
-        tableau_distribution = pd.DataFrame({'Modalités': effectifs.index, 'Effectifs': effectifs.values, 'Fréquences': frequences.values})
-        fig=plt.figure()
-        plt.bar(tableau_distribution['Modalités'], tableau_distribution['Fréquences'], color='skyblue')
-        plt.xlabel('Modalités')
-        plt.ylabel('Fréquences')
-        st.pyplot(fig)
-        
-        # représentation graphique des corrélations (nuage de points)
-        styled_write2("<p  style= 'font-weight:bold;color:rgb(15, 76, 116);'>Voici un aperçu des relations entre les principales variables de votre jeu de donnée</p>")
-        if selected_columns!=[]:
-            toplot=df[display_columns]
-            fig = sns.pairplot(toplot)
-            st.pyplot(fig)
-
         # représentation graphique des corrélations (palettes de couleurs)
+        styled_write("Représentation graphique des corrélations: heatmap")
         mask = np.triu(df.select_dtypes("number").corr())
         fig2, ax = plt.subplots(figsize=(10, 10))
         cmap = sns.diverging_palette(15, 160, n=11, s=100)
@@ -119,6 +97,30 @@ def nettoyage(uploadFile):
             ax=ax
             )
         st.pyplot(fig2)
+        styled_write2("<p  style= 'font-weight:bold;color:rgb(15, 76, 116);'>Le modèle de ML sera appliqué sur les colonnes que vous allez sélectionner</p>")
+        selected_columns=st.multiselect("Choisissez vos features :", df.columns)
+        display_columns = selected_columns.copy()
+        display_columns.append('target')
+        
+        # représentation graphique Target
+        styled_write2("<p  style= 'font-weight:bold;color:rgb(15, 76, 116);'>Voici la représentation graphique de votre target</p>")
+        frequences = df['target'].value_counts(normalize=True)
+        effectifs = df['target'].value_counts()
+        tableau_distribution = pd.DataFrame({'Modalités': effectifs.index, 'Effectifs': effectifs.values, 'Fréquences': frequences.values})
+        fig=plt.figure()
+        plt.bar(tableau_distribution['Modalités'], tableau_distribution['Fréquences'], color='skyblue')
+        plt.xlabel('Modalités')
+        plt.ylabel('Fréquences')
+        st.pyplot(fig)
+        
+        # représentation graphique des corrélations (nuage de points)
+        styled_write2("<p  style= 'font-weight:bold;color:rgb(15, 76, 116);'>Voici un aperçu des relations entre les features selectionnées et votre target</p>")
+        if selected_columns!=[]:
+            toplot=df[display_columns]
+            fig = sns.pairplot(toplot)
+            st.pyplot(fig)
+
+        
 
     return df, selected_columns,categ
 

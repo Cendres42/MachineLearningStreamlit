@@ -5,12 +5,27 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.metrics import  roc_auc_score
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import GridSearchCV, validation_curve
 from sklearn.metrics import accuracy_score
 from style import styled_write
-from regression import validationCroisee
 import joblib
+import numpy as np
+import matplotlib.pyplot as plt
 
+#
+# @param le model et les données d'entrainement
+# @brief fonction qui effectue une validation croisée pour tester le modèle
+#
+def validationCroiseeC(model,X_train,y_train):
+	k=np.arange(1,50)
+	train_score, val_score=validation_curve(model ,X_train, y_train, param_name='n_neighbors',param_range=k, cv=5)
+	fig=plt.figure()
+	plt.plot(k,val_score.mean(axis=1),label='validation')
+	plt.plot(k,train_score.mean(axis=1),label='train')
+	plt.ylabel('score')
+	plt.xlabel('n_neighbors')
+	plt.legend()
+	st.pyplot(fig)
 
 #
 # @brief application d'un gridSearchCV à un modèle de régression logistique
@@ -95,6 +110,10 @@ def classificationChoice(df,selected_model,selected_columns):
 			styled_write("La valeur des hyperparamètres est optimisée grâce à GridSearchCV")
 		else:
 			grid_search=KNeighborsClassifier()
+		# Validation croisée
+		checkbox_value2=st.checkbox("Cocher cette case si vous souhaitez effectuer une validation croisée")
+		if checkbox_value2:
+			validationCroiseeC(grid_search,X_train,y_train)
 	else:
 		return ("NoData")
 	# Entrainement du modèle
@@ -124,10 +143,6 @@ def classificationChoice(df,selected_model,selected_columns):
 	cr = classification_report(y_test, y_pred)
 	st.text("Rapport de Classification :\n\n{}".format(cr))
 	
-	# Validation croisée
-	checkbox_value2=st.checkbox("Cocher cette case si vous souhaitez effectuer une validation croisée")
-	if checkbox_value2:
-		validationCroisee(df,selected_columns,5)
 	
 	# Sauvegarde du modèle
 	st.title("Sauvegarder le modèle de ML")
